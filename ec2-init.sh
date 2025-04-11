@@ -40,13 +40,6 @@ services:
       - DB_PASSWORD=YOUR_DB_PASSWORD
     restart: always
     
-  migrations:
-    image: ECR_REPO_URI:latest
-    environment:
-      - DATABASE_URL=postgresql://neondb_owner:YOUR_DB_PASSWORD@ep-fancy-lab-a5kqy0m9-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require
-      - DB_PASSWORD=YOUR_DB_PASSWORD
-    command: python -m migrations.migrate_datetime_to_date_time
-    restart: "no"
 EOF
 
 # Start the application

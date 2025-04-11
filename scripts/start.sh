@@ -13,17 +13,7 @@ if [ -z "$DB_PASSWORD" ]; then
   exit 1
 fi
 
-# Run the migration script
-echo "Running database migrations..."
-python -m migrations.migrate_datetime_to_date_time
 
-# Check if the migration was successful
-if [ $? -eq 0 ]; then
-  echo "Migrations completed successfully!"
-else
-  echo "Migration failed. Please check the logs for details."
-  exit 1
-fi
 
 # Start the application based on the environment
 if [ "$DEBUG" = "True" ]; then

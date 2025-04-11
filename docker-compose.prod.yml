@@ -28,20 +28,6 @@ services:
         uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
       "
 
-  # Run migrations before deploying the main application
-  migrations:
-    image: ${DOCKER_REGISTRY:-localhost}/apollo-appointment-api:${TAG:-latest}
-    environment:
-      - DATABASE_URL=postgresql://neondb_owner:npg_CvI6TxzS7Lal@ep-fancy-lab-a5kqy0m9-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require
-    command: >
-      bash -c "
-        echo 'Running production database migrations...' &&
-        python -m migrations.migrate_datetime_to_date_time &&
-        echo 'Migrations completed successfully!'
-      "
-    restart: "no"
-    networks:
-      - frontend
 
   # Add nginx for SSL termination and request routing
   nginx:

@@ -10,13 +10,6 @@ A FastAPI backend application for booking appointments at Apollo Hospitals Chenn
 - Cloud-ready
 - Automatic deletion of old appointments when a patient books a new one
 - Separate date and time fields for better appointment management
-- Automated database migrations
-
-## Requirements
-
-- Python 3.9+
-- Neon PostgreSQL account
-- Docker & Docker Compose (optional)
 
 ## Installation and Setup
 
@@ -33,7 +26,6 @@ A FastAPI backend application for booking appointments at Apollo Hospitals Chenn
    docker-compose up -d
    ```
    This will automatically:
-   - Run database migrations
    - Start the FastAPI application in development mode with hot-reload
 
 4. For production deployment:
@@ -50,7 +42,7 @@ A FastAPI backend application for booking appointments at Apollo Hospitals Chenn
 
 ### Running with the Start Script
 
-We provide a convenient start script that handles migrations and application startup:
+We provide a convenient start script that handles application startup:
 
 ```bash
 # Make sure the script is executable
@@ -73,26 +65,10 @@ chmod +x scripts/start.sh
    pip install -r requirements.txt
    ```
 4. Copy `.env.template` to `.env` and update with your Neon DB password
-5. Run the database migrations:
-   ```bash
-   python -m migrations.migrate_datetime_to_date_time
-   ```
-6. Run the application:
+5. Run the application:
    ```bash
    uvicorn app.main:app --reload
    ```
-
-## Database Migrations
-
-The application now uses separate date and time fields instead of a combined dateTime field. Migrations are handled automatically when using Docker or the start script.
-
-If you need to run migrations manually:
-
-```bash
-python -m migrations.migrate_datetime_to_date_time
-```
-
-See the [migrations README](migrations/README.md) for more details.
 
 ## Environment Variables
 
@@ -133,7 +109,6 @@ Appointments now use separate date and time fields:
 ### Development (docker-compose.yml)
 - FastAPI application connected to Neon DB
 - Hot-reload enabled for development
-- Automatic database migrations
 - Health checks for application monitoring
 
 ### Production (docker-compose.prod.yml)
