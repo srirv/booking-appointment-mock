@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    image: ECR_REPO_URI:latest
+    ports:
+      - "80:8000"
+    environment:
+      - DATABASE_URL=postgresql://neondb_owner:YOUR_DB_PASSWORD@ep-fancy-lab-a5kqy0m9-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require
+      - API_PREFIX=/v1
+      - DEBUG=False
+      - DB_PASSWORD=YOUR_DB_PASSWORD
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    command: >
+      bash -c "
+        python -m migrations.migrate_datetime_to_date_time &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+  
+  # Run migrations as a separate service that exits after completion
+  migrations:
+    image: ECR_REPO_URI:latest
+    environment:
+      - DATABASE_URL=postgresql://neondb_owner:YOUR_DB_PASSWORD@ep-fancy-lab-a5kqy0m9-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require
+      - DB_PASSWORD=YOUR_DB_PASSWORD
+    command: python -m migrations.migrate_datetime_to_date_time
+    restart: "no"
+    depends_on:
+      - app
+
+volumes:
+  postgres_data: 

@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: Apollo Hospitals Chennai Appointment Booking API
+  description: API for CRUD (Create, Read, Update, Patch) operations on appointments
+  version: 1.0.0
+
+servers:
+  - url: https://api.apollohospitalschennai.com/v1
+    description: Production server
+
+paths:
+  /appointments:
+    get:
+      summary: Get all appointments
+      description: Retrieve a list of all existing appointments
+      operationId: getAllAppointments
+      responses:
+        '200':
+          description: A list of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Appointment'
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create a new appointment
+      description: Book a new appointment for a patient
+      operationId: createAppointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentCreateRequest'
+      responses:
+        '201':
+          description: Appointment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+
+  /appointments/{appointmentId}:
+    get:
+      summary: Get a single appointment
+      description: Retrieve an existing appointment by its ID
+      operationId: getAppointmentById
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          description: The ID of the appointment to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Appointment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '404':
+          description: Appointment not found
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update an appointment
+      description: Fully update all fields for an existing appointment
+      operationId: updateAppointment
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          description: The ID of the appointment to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentUpdateRequest'
+      responses:
+        '200':
+          description: Appointment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '400':
+          description: Invalid input
+        '404':
+          description: Appointment not found
+        '500':
+          description: Internal server error
+
+    patch:
+      summary: Partially update an existing appointment
+      description: Patch one or more fields in an existing appointment
+      operationId: patchAppointment
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          description: The ID of the appointment to patch
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentPatchRequest'
+      responses:
+        '200':
+          description: Appointment patched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+        '400':
+          description: Invalid input
+        '404':
+          description: Appointment not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Appointment:
+      type: object
+      properties:
+        appointmentId:
+          type: string
+          description: Unique system-generated ID for the appointment
+          example: "6123456789abcdef"
+        patientId:
+          type: string
+          description: Unique ID of the patient
+          example: "PAT-12345"
+        name:
+          type: string
+          description: Name of the patient
+          example: "John Doe"
+        date:
+          type: string
+          format: date
+          description: The date of the appointment
+          example: "2025-03-15"
+        time:
+          type: string
+          format: time
+          description: The time of the appointment
+          example: "10:30:00"
+        department:
+          type: string
+          description: Department where the appointment takes place
+          example: "Cardiology"
+        doctorName:
+          type: string
+          description: Name of the doctor for the appointment
+          example: "Dr. Priya Sharma"
+      required:
+        - appointmentId
+        - patientId
+        - name
+        - date
+        - time
+        - department
+        - doctorName
+
+    AppointmentCreateRequest:
+      type: object
+      properties:
+        patientId:
+          type: string
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+          format: time
+        department:
+          type: string
+        doctorName:
+          type: string
+      required:
+        - patientId
+        - name
+        - date
+        - time
+        - department
+        - doctorName
+
+    AppointmentUpdateRequest:
+      type: object
+      properties:
+        patientId:
+          type: string
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+          format: time
+        department:
+          type: string
+        doctorName:
+          type: string
+      required:
+        - patientId
+        - name
+        - date
+        - time
+        - department
+        - doctorName
+
+    AppointmentPatchRequest:
+      type: object
+      description: Fields allowed to be partially updated
+      properties:
+        patientId:
+          type: string
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+          format: time
+        department:
+          type: string
+        doctorName:
+          type: string 
