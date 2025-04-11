@@ -1,0 +1,37 @@
+services:
+  # API Service
+  - type: web
+    name: apollo-hospital-api
+    env: docker
+    repo: https://github.com/srirv/booking-appointment-mock
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /v1/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: API_PREFIX
+        value: /v1
+      - key: DEBUG
+        value: false
+    plan: starter
+    autoDeploy: true
+    numInstances: 1
+    
+  # PostgreSQL Database (if not using Neon DB)
+  # Uncomment this section if you want to use Render's PostgreSQL
+  # - type: pserv
+  #   name: apollo-hospital-db
+  #   env: docker
+  #   repo: https://github.com/render-examples/postgres
+  #   envVars:
+  #     - key: POSTGRES_USER
+  #       value: postgres
+  #     - key: POSTGRES_PASSWORD
+  #       sync: false
+  #     - key: POSTGRES_DB
+  #       value: apollo_hospital
+  #   disk:
+  #     name: postgres-data
+  #     mountPath: /var/lib/postgresql/data
+  #     sizeGB: 10 
