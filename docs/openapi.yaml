@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: Apollo Hospitals Chennai Appointment Booking API
-  description: API for CRUD (Create, Read, Update, Patch) operations on appointments
-  version: 1.0.0
+  description: API for CRUD operations on appointments, slot availability, booking details, rescheduling, cancellation, OTP and SMS notifications
+  version: 1.1.0
 
 servers:
   - url: https://api.apollohospitalschennai.com/v1
@@ -25,7 +25,6 @@ paths:
                   $ref: '#/components/schemas/Appointment'
         '500':
           description: Internal server error
-
     post:
       summary: Create a new appointment
       description: Book a new appointment for a patient
@@ -71,7 +70,6 @@ paths:
           description: Appointment not found
         '500':
           description: Internal server error
-
     put:
       summary: Update an appointment
       description: Fully update all fields for an existing appointment
@@ -102,7 +100,6 @@ paths:
           description: Appointment not found
         '500':
           description: Internal server error
-
     patch:
       summary: Partially update an existing appointment
       description: Patch one or more fields in an existing appointment
@@ -131,6 +128,238 @@ paths:
           description: Invalid input
         '404':
           description: Appointment not found
+        '500':
+          description: Internal server error
+
+  /appointments/availability:
+    get:
+      summary: Check slot availability and get appointment timing
+      description: Retrieve whether slots are available on a given date, the first available appointment time, next available slot datetime, and assigned doctor
+      operationId: getAppointmentAvailability
+      parameters:
+        - name: appointmentDate
+          in: query
+          required: true
+          description: Date to check for slot availability
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Slot availability details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentAvailabilityResponse'
+        '400':
+          description: Invalid date format
+        '500':
+          description: Internal server error
+
+  /appointments/booking-details:
+    get:
+      summary: Fetch appointment booking details
+      description: Retrieve booking details for a given appointment number and date
+      operationId: getBookingDetails
+      parameters:
+        - name: appointmentDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: appointmentNumber
+          in: query
+          required: true
+          description: Six-digit appointment number
+          schema:
+            type: string
+            pattern: '^\d{6}$'
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDetailsResponse'
+        '404':
+          description: Booking not found
+        '500':
+          description: Internal server error
+
+  /appointments/details:
+    get:
+      summary: Fetch appointment details by phone number
+      description: Retrieve appointment availability and details associated with a user's phone number
+      operationId: getAppointmentByPhone
+      parameters:
+        - name: userPhoneNumber
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Appointment details for user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentUserDetailsResponse'
+        '404':
+          description: No appointment found for this phone number
+        '500':
+          description: Internal server error
+
+  /auth/send-otp:
+    post:
+      summary: Send OTP to user's phone
+      description: Generate and send a 6-digit OTP to the provided phone number
+      operationId: sendOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpRequest'
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpResponse'
+        '400':
+          description: Invalid phone number
+        '500':
+          description: Internal server error
+
+  /appointments/{appointmentNumber}/reschedule:
+    get:
+      summary: Fetch reschedule availability
+      description: Check if an appointment can be rescheduled after user validation
+      operationId: getRescheduleDetails
+      parameters:
+        - name: appointmentNumber
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userValidated
+          in: query
+          required: true
+          description: Whether the user has validated via OTP
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Reschedule availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RescheduleDetailsResponse'
+        '400':
+          description: User not validated
+        '404':
+          description: Appointment not found
+        '500':
+          description: Internal server error
+
+  /appointments/{appointmentNumber}/cancellation:
+    get:
+      summary: Fetch cancellation status
+      description: Check if an appointment has been cancelled after user validation
+      operationId: getCancellationDetails
+      parameters:
+        - name: appointmentNumber
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userValidated
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cancellation status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationDetailsResponse'
+        '400':
+          description: User not validated
+        '404':
+          description: Appointment not found
+        '500':
+          description: Internal server error
+
+  /notifications/sms/booking:
+    post:
+      summary: Send SMS with booking details
+      description: Send an SMS containing booking information to the user
+      operationId: sendSmsBookingDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsBookingRequest'
+      responses:
+        '200':
+          description: SMS send status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmsResponse'
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+
+  /notifications/sms/cancellation:
+    post:
+      summary: Send SMS with cancellation details
+      description: Notify user via SMS that their appointment has been cancelled
+      operationId: sendSmsCancellationDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsCancellationRequest'
+      responses:
+        '200':
+          description: SMS send status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmsResponse'
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal server error
+
+  /notifications/sms/reschedule:
+    post:
+      summary: Send SMS with rescheduled details
+      description: Notify user via SMS that their appointment has been rescheduled
+      operationId: sendSmsRescheduleDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsRescheduleRequest'
+      responses:
+        '200':
+          description: SMS send status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmsResponse'
+        '400':
+          description: Invalid input
         '500':
           description: Internal server error
 
@@ -245,4 +474,174 @@ components:
         department:
           type: string
         doctorName:
-          type: string 
+          type: string
+
+    AppointmentAvailabilityResponse:
+      type: object
+      properties:
+        slotAvailable:
+          type: boolean
+          description: Whether a slot is available on the given date
+        appointmentTime:
+          type: string
+          format: time
+          description: First available appointment time if slotAvailable is true
+        nextAvailableSlot:
+          type: string
+          format: date-time
+          description: Next available appointment slot datetime if no slot on requested date
+        doctorName:
+          type: string
+          description: Doctor assigned for the available slot
+      required:
+        - slotAvailable
+        - doctorName
+
+    BookingDetailsResponse:
+      type: object
+      properties:
+        appointmentDate:
+          type: string
+          format: date
+        appointmentNumber:
+          type: string
+        appointmentTime:
+          type: string
+          format: time
+        userPhoneNumber:
+          type: string
+        userName:
+          type: string
+      required:
+        - appointmentDate
+        - appointmentNumber
+        - appointmentTime
+        - userPhoneNumber
+        - userName
+
+    AppointmentUserDetailsResponse:
+      type: object
+      properties:
+        appointmentAvailable:
+          type: boolean
+          description: Whether the user has an appointment
+        appointmentNumber:
+          type: string
+        userName:
+          type: string
+        appointmentDate:
+          type: string
+          format: date
+        appointmentTime:
+          type: string
+          format: time
+      required:
+        - appointmentAvailable
+
+    OtpRequest:
+      type: object
+      properties:
+        userPhoneNumber:
+          type: string
+      required:
+        - userPhoneNumber
+
+    OtpResponse:
+      type: object
+      properties:
+        sentOtp:
+          type: string
+          description: Six-digit OTP sent to the user
+          pattern: '^\d{6}$'
+      required:
+        - sentOtp
+
+    RescheduleDetailsResponse:
+      type: object
+      properties:
+        rescheduleAvailable:
+          type: boolean
+          description: Whether the appointment can be rescheduled
+      required:
+        - rescheduleAvailable
+
+    CancellationDetailsResponse:
+      type: object
+      properties:
+        appointmentCancelled:
+          type: boolean
+          description: Whether the appointment has been cancelled
+      required:
+        - appointmentCancelled
+
+    SmsBookingRequest:
+      type: object
+      properties:
+        appointmentDate:
+          type: string
+          format: date
+        appointmentTime:
+          type: string
+          format: time
+        userPhoneNumber:
+          type: string
+        userName:
+          type: string
+        doctorName:
+          type: string
+        userAddress:
+          type: string
+      required:
+        - appointmentDate
+        - appointmentTime
+        - userPhoneNumber
+        - userName
+        - doctorName
+        - userAddress
+
+    SmsCancellationRequest:
+      type: object
+      properties:
+        appointmentDate:
+          type: string
+          format: date
+        appointmentTime:
+          type: string
+          format: time
+        userPhoneNumber:
+          type: string
+        userName:
+          type: string
+      required:
+        - appointmentDate
+        - appointmentTime
+        - userPhoneNumber
+        - userName
+
+    SmsRescheduleRequest:
+      type: object
+      properties:
+        appointmentDate:
+          type: string
+          format: date
+        appointmentTime:
+          type: string
+          format: time
+        userPhoneNumber:
+          type: string
+        userName:
+          type: string
+      required:
+        - appointmentDate
+        - appointmentTime
+        - userPhoneNumber
+        - userName
+
+    SmsResponse:
+      type: object
+      properties:
+        smsSent:
+          type: boolean
+          description: Whether the SMS was sent successfully
+      required:
+        - smsSent

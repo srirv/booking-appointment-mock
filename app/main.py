@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 
 from app.api.appointments import router as appointments_router
+from app.api.appointments import auth_router, notifications_router
 from app.db.base import Base, engine
 
 # Load environment variables
@@ -18,8 +19,8 @@ api_prefix = os.getenv("API_PREFIX", "/v1")
 # Create FastAPI app
 app = FastAPI(
     title="Apollo Hospitals Chennai Appointment Booking API",
-    description="API for CRUD operations on appointments",
-    version="1.0.0",
+    description="API for CRUD operations on appointments, slot availability, booking details, rescheduling, cancellation, OTP and SMS notifications",
+    version="1.1.0",
     openapi_url=f"{api_prefix}/openapi.json",
     docs_url=f"{api_prefix}/docs",
     redoc_url=f"{api_prefix}/redoc",
@@ -36,6 +37,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(appointments_router, prefix=api_prefix)
+app.include_router(auth_router, prefix=api_prefix)
+app.include_router(notifications_router, prefix=api_prefix)
 
 @app.get("/", include_in_schema=False)
 def root():

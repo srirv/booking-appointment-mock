@@ -12,3 +12,4 @@ python-jose==3.3.0
 passlib==1.7.4
 uuid==1.30 
 sqlalchemy
+certifi==2024.2.2
