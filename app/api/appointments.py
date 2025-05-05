@@ -134,14 +134,12 @@ def get_appointment_availability(appointmentDate: date = Query(...), db: Session
 
 @router.get("/booking-details", response_model=BookingDetailsResponse)
 def get_booking_details(
-    appointmentDate: date = Query(...),
     appointmentNumber: str = Query(..., regex=r'^\d{6}$'),
     db: Session = Depends(get_db)
 ):
-    # Look up the appointment by appointmentId (which is now our appointmentNumber) and date
+    # Look up the appointment by appointmentId (which is now our appointmentNumber)
     appointment = db.query(AppointmentModel).filter(
-        AppointmentModel.appointmentId == appointmentNumber,
-        AppointmentModel.date == appointmentDate
+        AppointmentModel.appointmentId == appointmentNumber
     ).first()
     
     if appointment:
