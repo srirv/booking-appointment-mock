@@ -25,6 +25,7 @@ class AppointmentPatchRequest(BaseModel):
     department: Optional[str] = None
     doctorName: Optional[str] = None
     userPhoneNumber: Optional[str] = None
+    isCancelled: Optional[bool] = False
 
 class Appointment(AppointmentBase):
     appointmentId: str
