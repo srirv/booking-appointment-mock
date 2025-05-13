@@ -227,39 +227,6 @@ def create_appointment(request: Request, appointment: AppointmentCreateRequest, 
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to create appointment")
 
-@router.put("/{appointmentId}", response_model=Appointment)
-def update_appointment(
-    request: Request, 
-    appointmentId: str = Path(..., regex=r'^\d{6}$'), 
-    appointment: AppointmentUpdateRequest = None, 
-    db: Session = Depends(get_db)
-):
-    logger.info(f"Updating appointment with ID: {appointmentId} - Client: {request.client.host}")
-    try:
-        db_appointment = db.query(AppointmentModel).filter(AppointmentModel.appointmentId == appointmentId).first()
-        if db_appointment is None:
-            logger.warning(f"Appointment with ID {appointmentId} not found for update")
-            raise HTTPException(status_code=404, detail="Appointment not found")
-        
-        # Update all fields
-        logger.debug(f"Updating all fields for appointment {appointmentId}")
-        update_data = appointment.dict()
-        for key, value in update_data.items():
-            logger.debug(f"Setting {key} = {value}")
-            setattr(db_appointment, key, value)
-        
-        db.commit()
-        db.refresh(db_appointment)
-        logger.info(f"Appointment {appointmentId} updated successfully")
-        return db_appointment
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error updating appointment: {str(e)}")
-        logger.debug(traceback.format_exc())
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to update appointment")
-
 @router.patch("/{appointmentId}", response_model=Appointment)
 def patch_appointment(
     request: Request, 
